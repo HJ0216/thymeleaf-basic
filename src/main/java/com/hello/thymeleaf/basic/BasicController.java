@@ -113,6 +113,12 @@ public class BasicController {
     model.addAttribute("users", list);
   }
 
+  @GetMapping("/condition")
+  public String condition(Model model) {
+    addUsers(model);
+    return "basic/condition";
+  }
+
   @Component("helloBean")
   static class HelloBean {
 
