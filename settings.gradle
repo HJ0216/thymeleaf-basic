@@ -1,1 +1,4 @@
-rootProject.name = 'thymeleaf-basic'
+rootProject.name = 'thymeleaf'
+
+include 'thymeleaf-basic'
+include 'thymeleaf-form'
