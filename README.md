@@ -226,6 +226,43 @@ static class HelloBean {
 
 
 
+## 멀티 모듈 생성
+1. Root Project 생성
+
+2. Root Project 내 구조 정리
+```txt
+📁 root/
+├── 📁 .git                ✅
+├── 📁 gradle              ✅  
+├── 📁 subProject1/        ✅
+│   ├── 📁 src/            ✅
+│   └── 📄 build.gradle    ✅ 해당 프로젝트만의 설정
+├── 📁 subProject2/        ✅
+│   ├── 📁 src/            ✅
+│   └── 📄 build.gradle    ✅ 해당 프로젝트만의 설정
+├── 📄 .gitattributes      ✅ Root에 1개
+├── 📄 .gitignore          ✅ Root에 1개
+├── 📄 build.gradle        ✅ 공통 속성 선언
+├── 📄 gradlew             ✅ Root에 1개
+├── 📄 gradlew.bat         ✅ Root에 1개
+└── 📄 settings.gradle     ✅ Root에 1개
+```
+
+3. 프로젝트 구조 선언
+```bash
+# settings.gradle
+
+rootProject.name = 'root'
+
+include 'subProject1'
+include 'subProject2'
+```
+
+4. 빌드 테스트
+```bash
+gradlew projects # 전체 빌드
+gradlew :subProject1:bootRun # 개별 프로젝트 빌드
+```
 
 
 ### 참고자료
