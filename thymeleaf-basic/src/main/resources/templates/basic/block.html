@@ -7,11 +7,11 @@
 <body>
 <th:block th:each="user : ${users}">
   <div>
-    사용자 이름1 <span th:text="${user.username}"></span>
+    사용자 이름1 <span th:text="${user.name}"></span>
     사용자 나이1 <span th:text="${user.age}"></span>
   </div>
   <div>
-    요약 <span th:text="${user.username} + ' / ' + ${user.age}"></span>
+    요약 <span th:text="${user.name} + ' / ' + ${user.age}"></span>
   </div>
 </th:block>
 </body>

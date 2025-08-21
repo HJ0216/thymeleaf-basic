@@ -8,10 +8,10 @@
 
 <!-- 자바스크립트 인라인 사용 전 -->
 <script>
-  var username = [[${user.username}]];
+  var name = [[${user.name}]];
   var age = [[${user.age}]];
   //자바스크립트 내추럴 템플릿
-  var username2 = /*[[${user.username}]]*/ "test username";
+  var name2 = /*[[${user.name}]]*/ "test name";
   //객체
   var user = [[${user}]];
 
@@ -19,10 +19,10 @@
 
 <!-- 자바스크립트 인라인 사용 후 -->
 <script th:inline="javascript">
-  var username = [[${user.username}]];
+  var name = [[${user.name}]];
   var age = [[${user.age}]];
   //자바스크립트 내추럴 템플릿
-  var username2 = /*[[${user.username}]]*/ "test username";
+  var name2 = /*[[${user.name}]]*/ "test name";
   //객체
   var user = [[${user}]];
 

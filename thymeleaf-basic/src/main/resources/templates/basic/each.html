@@ -10,11 +10,11 @@
 
 <table border="1">
   <tr>
-    <th>username</th>
+    <th>name</th>
     <th>age</th>
   </tr>
   <tr th:each="user : ${users}">
-    <td th:text="${user.username}">username</td>
+    <td th:text="${user.name}">name</td>
     <td th:text="${user.age}">0</td>
   </tr>
 </table>
@@ -24,13 +24,13 @@
 <table border="1">
   <tr>
     <th>count</th>
-    <th>username</th>
+    <th>name</th>
     <th>age</th>
     <th>etc</th>
   </tr>
   <tr th:each="user, userStat : ${users}">
-    <td th:text="${userStat.count}">username</td>
-    <td th:text="${user.username}">username</td>
+    <td th:text="${userStat.count}">name</td>
+    <td th:text="${user.name}">name</td>
     <td th:text="${user.age}">0</td>
     <td>
       index = <span th:text="${userStat.index}"></span>
