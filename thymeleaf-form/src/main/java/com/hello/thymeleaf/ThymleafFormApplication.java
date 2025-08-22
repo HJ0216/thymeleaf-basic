@@ -1,4 +1,4 @@
-package com.hello.thymleaf_form;
+package com.hello.thymeleaf;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
