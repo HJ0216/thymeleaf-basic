@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <link href="../css/bootstrap.min.css"
+        th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
+  <!--  Thymeleaf가 처리하지 않은 상태에서도 HTML이 정상적으로 보이도록 하기 위해 href도 선언-->
+  <!--  Thymeleaf 엔진이 템플릿을 처리할 때, th: 속성을 찾아서 해당하는 일반 속성을 무조건 덮어쓰기 함-->
+</head>
+<body>
+<div class="container" style="max-width: 600px">
+  <div class="py-5 text-center">
+    <h2>상품 목록</h2>
+  </div>
+
+  <div class="row">
+    <div class="col">
+      <button class="btn btn-primary float-end"
+              onclick="location.href='addForm.html'"
+              th:onclick="|location.href='@{/form/items/add}'|"
+              type="button">상품 등록
+      </button>
+    </div>
+  </div>
+
+  <hr class="my-4"/>
+
+  <div>
+    <table class="table">
+      <thead>
+      <tr>
+        <th>ID</th>
+        <th>상품명</th>
+        <th>가격</th>
+        <th>수량</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="item : ${items}">
+        <td><a href="item.html" th:href="@{/form/items/{itemId}(itemId=${item.Id})}"
+               th:text="${item.id}">회원 ID</a></td>
+        <td><a href="item.html" th:href="@{|/form/items/{item.Id}|}" th:text="${item.name}">상품명</a>
+        </td>
+        <td th:text="${item.price}">10000</td>
+        <td th:text="${item.quantity}">10</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+</body>
+</html>
