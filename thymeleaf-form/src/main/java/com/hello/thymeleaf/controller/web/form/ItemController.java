@@ -4,6 +4,7 @@ import com.hello.thymeleaf.domain.Item;
 import com.hello.thymeleaf.repository.ItemRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+@Slf4j
 @Controller
 @RequestMapping("/form/items")
 @RequiredArgsConstructor
@@ -43,6 +45,8 @@ public class ItemController {
 
   @PostMapping("/add")
   public String addItem(@ModelAttribute Item item, RedirectAttributes redirectAttributes) {
+    log.info("item.open={}", item.getOpen());
+
     Item savedItem = itemRepository.save(item);
     redirectAttributes.addAttribute("itemId", savedItem.getId());
     // itemId: URL 패턴에 {itemId}가 있음 → Path Variable로 치환
