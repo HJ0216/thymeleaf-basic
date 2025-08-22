@@ -36,7 +36,8 @@ public class ItemController {
   }
 
   @GetMapping("/add")
-  public String addForm() {
+  public String addForm(Model model) {
+    model.addAttribute("item", new Item());
     return "form/addForm";
   }
 

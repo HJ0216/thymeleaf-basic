@@ -1,9 +1,11 @@
 package com.hello.thymeleaf.domain;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter @Setter
+@NoArgsConstructor
 public class Item {
 
   private Long id;
