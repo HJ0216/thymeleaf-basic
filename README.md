@@ -226,6 +226,80 @@ static class HelloBean {
 
 
 
+## 입력 폼 처리
+* `th:object="${item}"` : `<form>` 에서 사용할 객체를 지정
+  * 선택 변수 식( `*{...}` )을 적용할 수 있음
+  * `th:field` 는 `id` , `name` , `value` 속성을 모두 자동으로 만들어줌
+```html
+<form action="item.html" th:action th:object="${item}" method="post">
+  <div>
+    <label for="itemName">상품명</label>
+    <input type="text" id="itemName" th:field="*{itemName}" class="form-control" placeholder="이름을 입력하세요">
+  </div>
+</form>
+```
+
+
+## 체크 박스 단일
+* 체크 박스를 체크하면 HTML Form에서 `open=on` 이라는 값이 넘어감 → 스프링은 `on` 이라는 문자를 `true` 타입으로 변환
+* HTML에서 체크 박스를 선택하지 않고 폼을 전송하면 `open` 이라는 필드 자체가 서버로 전송되지 않음
+  * 히든 필드를 하나 만들어서, `_open` 처럼 기존 체크 박스 이름 앞에 언더스코어( `_` )를 붙여서 전송하면 체크를 해제했다고 인식(히든 필드는 항상 전송)
+* 타임리프의 `th:field` 를 사용하면, 값이 `true` 인 경우 checked` 속성을 자동으로 추가
+
+
+## 체크 박스 다중
+* `@ModelAttribute`
+  * 각각의 컨트롤러 메서드에서 모델에 직접 데이터를 담아서 처리할 수 있음
+```java
+@ModelAttribute("regions")
+public Map<String, String> regions() {
+  Map<String, String> regions = new LinkedHashMap<>();
+
+  regions.put("SEOUL", "서울");
+  regions.put("BUSAN", "부산");
+  regions.put("JEJU", "제주");
+  
+  return regions;
+}
+```
+
+* `th:for="${#ids.prev('regions')}"`
+  * Thymeleaf가 자동 생성한 이전 input의 ID를 가져오는 유틸리티
+```txt
+#ids 유틸리티:
+
+${#ids.seq('필드명')}: 다음 순번 ID 생성
+${#ids.prev('필드명')}: 이전에 생성된 ID 반환
+${#ids.next('필드명')}: 다음 ID 미리 보기
+```
+  * 타임리프는 체크박스를 `each` 루프 안에서 반복해서 만들 때 임의로 `1` , `2` , `3` 숫자를 뒤에 붙여줌
+```html
+<div>
+  <div>등록 지역</div>
+  <div th:each="region : ${regions}" class="form-check form-check-inline">
+    <input type="checkbox" th:field="*{regions}" th:value="${region.key}" class="form-check-input">
+    <label th:for="${#ids.prev('regions')}" th:text="${region.value}" class="form-check-label">서울</label>
+  </div>
+</div>
+```
+* `th:field="*{regions}"`
+  * `name="regions"` 자동 설정
+  * `id="regions1, regions2, ..."` 자동 생성
+  * 체크 상태 관리
+    * Text Input의 경우, th:field가 name, id, value 모두 설정
+    * 체크박스의 경우, Value 설정은 안하고, Name 설정, ID 설정, 바인딩된 컬렉션에 해당 값이 있으면 checked 추가
+* `th:value="${region.key}"`
+  * 각 체크박스의 실제 value 값 설정
+  * th:field의 기본 value를 `override`
+* `_regions` 는 웹 브라우저에서 체크를 하나도 하지 않았을 때, 클라이언트가 서버에 아무런 데이터를 보내지 않는 것을 방지
+  * `_regions` 조차 보내지 않으면 결과는 `null`
+
+
+## 라디오 버튼
+* ItemType.values()` 를 사용하면 해당 ENUM의 모든 정보를 배열로 반환
+* 체크박스와 달리 선택하지 않으면 아무 값도 넘어가지 않음
+
+
 ## 멀티 모듈 생성
 1. Root Project 생성
 

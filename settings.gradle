@@ -2,3 +2,4 @@ rootProject.name = 'thymeleaf'
 
 include 'thymeleaf-basic'
 include 'thymeleaf-form'
+include 'thymeleaf-message'
