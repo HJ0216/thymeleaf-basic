@@ -1,7 +1,9 @@
 package com.hello.thymeleaf.domain;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+@Getter
 @RequiredArgsConstructor
 public enum ItemType {
 
