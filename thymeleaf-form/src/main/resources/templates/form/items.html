@@ -40,7 +40,7 @@
       <tr th:each="item : ${items}">
         <td><a href="item.html" th:href="@{/form/items/{itemId}(itemId=${item.Id})}"
                th:text="${item.id}">회원 ID</a></td>
-        <td><a href="item.html" th:href="@{|/form/items/{item.Id}|}" th:text="${item.name}">상품명</a>
+        <td><a href="item.html" th:href="@{|/form/items/${item.Id}|}" th:text="${item.name}">상품명</a>
         </td>
         <td th:text="${item.price}">10000</td>
         <td th:text="${item.quantity}">10</td>
