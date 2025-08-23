@@ -2,7 +2,9 @@ package com.hello.thymeleaf.controller.web.form;
 
 import com.hello.thymeleaf.domain.Item;
 import com.hello.thymeleaf.repository.ItemRepository;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -21,6 +23,16 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class ItemController {
 
   private final ItemRepository itemRepository;
+
+  @ModelAttribute("regions") // controller 호출 시, 자동으로 model.addAttribute();
+  public Map<String, String> regions(){
+    Map<String, String> regions = new LinkedHashMap<>(); // 순서 보장
+    regions.put("SEOUL", "서울");
+    regions.put("BUSAN", "부산");
+    regions.put("JEJU", "제주");
+
+    return regions;
+  }
 
   @GetMapping
   public String items(Model model) {
@@ -46,6 +58,7 @@ public class ItemController {
   @PostMapping("/add")
   public String addItem(@ModelAttribute Item item, RedirectAttributes redirectAttributes) {
     log.info("item.open={}", item.getOpen());
+    log.info("item.regions={}", item.getRegions());
 
     Item savedItem = itemRepository.save(item);
     redirectAttributes.addAttribute("itemId", savedItem.getId());
