@@ -300,6 +300,23 @@ ${#ids.next('필드명')}: 다음 ID 미리 보기
 * 체크박스와 달리 선택하지 않으면 아무 값도 넘어가지 않음
 
 
+## 타임리프 메시지 적용
+* 스프링 부트를 사용하면 스프링 부트가 `MessageSource` 를 자동으로 스프링 빈으로 등록
+  * 스프링 부트 메시지 소스 설정
+  * `spring.messages.basename=messages,config.i18n.messages`
+  * `MessageSource`를 스프링 빈으로 등록하지 않고, 스프링 부트와 관련된 별도의 설정을 하지 않으면 `messages` 라는 이름으로 기본 등록
+* 파라미터 X
+  * hello=안녕
+  * `<p th:text="#{hello}"></p>
+* 파라미터 O
+  * hello.name=안녕 {0}`
+  * `<p th:text="#{hello.name(${item.itemName})}"></p>
+
+## 국제화
+스프링은 언어 선택시 기본으로 `Accept-Language` 헤더의 값을 사용
+
+
+
 ## 멀티 모듈 생성
 1. Root Project 생성
 
