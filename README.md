@@ -326,6 +326,33 @@ ${#ids.next('필드명')}: 다음 ID 미리 보기
   * _` (No-Operation): 아무것도 하지 않음
 
 
+## BindingResult
+BindingResult bindingResult` 파라미터의 위치는 `@ModelAttribute Item item` 다음에 와야 함
+  * `BindingResult` 가 없으면 400 오류가 발생하면서 컨트롤러가 호출되지 않고, 오류 페이지로 이동
+  * `BindingResult` 가 있으면 오류 정보( `FieldError` )를 `BindingResult` 에 담아서 컨트롤러를 정상 호출
+
+### FieldError
+```java
+public FieldError(String objectName, String field, String defaultMessage) {}
+```
+* `objectName` : `@ModelAttribute` 이름
+* `field` : 오류 필드
+* `rejectedValue` : 사용자가 입력한 값(거절된 값)
+  * 사용자의 입력 데이터가 컨트롤러의 `@ModelAttribute` 에 바인딩되는 시점에 오류가 발생하면 모델 객체에 사용자 입력 값을 유지하기 어려움
+  * `FieldError` 는 오류 발생시 사용자 입력 값을 저장하는 기능을 제공
+* `bindingFailure` : 타입 오류 같은 바인딩 실패인지, 검증 실패인지 구분 값
+* `codes` : 메시지 코드
+* `arguments` : 메시지에서 사용하는 인자
+* `defaultMessage` : 기본 오류 메시지
+
+### ObjectError(글로벌 오류)
+```java
+public ObjectError(String objectName, String defaultMessage) {}
+```
+* `objectName` : `@ModelAttribute` 의 이름
+* `defaultMessage` : 오류 기본 메시지
+
+
 ## 멀티 모듈 생성
 1. Root Project 생성
 
