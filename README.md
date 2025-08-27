@@ -316,6 +316,15 @@ ${#ids.next('필드명')}: 다음 ID 미리 보기
 스프링은 언어 선택시 기본으로 `Accept-Language` 헤더의 값을 사용
 
 
+## Validation
+* `Map<String, String> errors = new HashMap<>();`
+  * 어떤 필드에서 오류가 발생했는지 구분하기 위해 오류가 발생한 필드명을 `key` 로 사용
+* Safe Navigation Operator
+  * `errors?.` 은 `errors` 가 `null` 일때 `NullPointerException` 이 발생하는 대신, `null` 을 반환
+  + `th:if` 에서 `null` 은 실패로 처리
+* `<input type="text" th:classappend="${errors?.containsKey('itemName')} ? 'field-error' : _" class="form-control">`
+  * _` (No-Operation): 아무것도 하지 않음
+
 
 ## 멀티 모듈 생성
 1. Root Project 생성
