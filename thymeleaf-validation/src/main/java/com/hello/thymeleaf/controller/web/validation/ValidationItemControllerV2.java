@@ -50,7 +50,6 @@ public class ValidationItemControllerV2 {
   public String addItemV1(
       @ModelAttribute Item item, // @ModelAttribute Item item으로 받은 객체는 자동으로 "item"이라는 이름으로 Model에 추가
       BindingResult bindingResult,
-      Model model,
       RedirectAttributes redirectAttributes
   ) {
     if (!StringUtils.hasText(item.getItemName())) {
@@ -87,7 +86,6 @@ public class ValidationItemControllerV2 {
   public String addItemV2(
       @ModelAttribute Item item, // @ModelAttribute Item item으로 받은 객체는 자동으로 "item"이라는 이름으로 Model에 추가
       BindingResult bindingResult,
-      Model model,
       RedirectAttributes redirectAttributes
   ) {
     if (!StringUtils.hasText(item.getItemName())) {
@@ -124,7 +122,6 @@ public class ValidationItemControllerV2 {
   public String addItemV3(
       @ModelAttribute Item item, // @ModelAttribute Item item으로 받은 객체는 자동으로 "item"이라는 이름으로 Model에 추가
       BindingResult bindingResult,
-      Model model,
       RedirectAttributes redirectAttributes
   ) {
     if (!StringUtils.hasText(item.getItemName())) {
