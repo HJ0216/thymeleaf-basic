@@ -340,6 +340,8 @@ public FieldError(String objectName, String field, String defaultMessage) {}
 * `rejectedValue` : 사용자가 입력한 값(거절된 값)
   * 사용자의 입력 데이터가 컨트롤러의 `@ModelAttribute` 에 바인딩되는 시점에 오류가 발생하면 모델 객체에 사용자 입력 값을 유지하기 어려움
   * `FieldError` 는 오류 발생시 사용자 입력 값을 저장하는 기능을 제공
+  * `th:field="*{price}"`
+    * 정상 상황에는 모델 객체의 값을 사용하지만, 오류가 발생하면 `FieldError` 에서 보관한 값을 사용해서 값을 출력
 * `bindingFailure` : 타입 오류 같은 바인딩 실패인지, 검증 실패인지 구분 값
 * `codes` : 메시지 코드
 * `arguments` : 메시지에서 사용하는 인자
