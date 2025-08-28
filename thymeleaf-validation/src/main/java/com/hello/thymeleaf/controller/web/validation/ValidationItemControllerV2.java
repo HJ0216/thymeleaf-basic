@@ -25,6 +25,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class ValidationItemControllerV2 {
 
   private final ItemRepository itemRepository;
+  private final ItemValidator validator;
 
   @GetMapping
   public String items(Model model) {
@@ -154,7 +155,7 @@ public class ValidationItemControllerV2 {
     return "redirect:/validation/v2/items/{itemId}";
   }
 
-  @PostMapping("/add")
+//  @PostMapping("/add")
   public String addItemV4(
       @ModelAttribute Item item, // @ModelAttribute Item item으로 받은 객체는 자동으로 "item"이라는 이름으로 Model에 추가
       BindingResult bindingResult,
@@ -181,6 +182,29 @@ public class ValidationItemControllerV2 {
         // object의 필드가 아닐 경우,
         bindingResult.reject("totalPriceMin", new Object[]{10_000, resultPrice}, null);
       }
+    }
+
+    if (bindingResult.hasErrors()) {
+      log.info("errors: {}", bindingResult);
+      return "validation/v2/addForm";
+    }
+
+    Item savedItem = itemRepository.save(item);
+    redirectAttributes.addAttribute("itemId", savedItem.getId());
+    redirectAttributes.addAttribute("status", true);
+    return "redirect:/validation/v2/items/{itemId}";
+  }
+
+  @PostMapping("/add")
+  public String addItemV5(
+      @ModelAttribute Item item, // @ModelAttribute Item item으로 받은 객체는 자동으로 "item"이라는 이름으로 Model에 추가
+      BindingResult bindingResult,
+      Model model,
+      RedirectAttributes redirectAttributes
+  ) {
+
+    if (validator.supports(item.getClass())) {
+      validator.validate(item, bindingResult);
     }
 
     if (bindingResult.hasErrors()) {
