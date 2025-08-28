@@ -330,6 +330,16 @@ ${#ids.next('필드명')}: 다음 ID 미리 보기
 BindingResult bindingResult` 파라미터의 위치는 `@ModelAttribute Item item` 다음에 와야 함
   * `BindingResult` 가 없으면 400 오류가 발생하면서 컨트롤러가 호출되지 않고, 오류 페이지로 이동
   * `BindingResult` 가 있으면 오류 정보( `FieldError` )를 `BindingResult` 에 담아서 컨트롤러를 정상 호출
+* `BindingResult` 는 검증해야 할 객체인 `target` 바로 다음에 와야하는데, 이를 통해 `BindingResult` 는 이미 본인이 검증해야 할 객체인 `target` 을 알고 있음
+  * bindingResult.getObjectName(): @ModelAttribute name
+  * bindingResult.getTarget(): 해당 객체
+* rejectValue(), reject()
+  * `field` : 오류 필드명
+  * `errorCode` : 오류 코드(메시지에 등록된 코드 X, messageResolver를 위한 오류 코드)
+  * `errorArgs` : 오류 메시지에서 `{0}` 을 치환하기 위한 값
+  * `defaultMessage` : 오류 메시지를 찾을 수 없을 때 사용하는 기본 메시지
+  * rejectValue(): 특정 필드에 대한 validation 에러를 추가할 때 사용
+  * reject(): 객체 전체에 대한 validation 에러를 추가할 때 사용
 
 ### FieldError
 ```java
@@ -353,6 +363,66 @@ public ObjectError(String objectName, String defaultMessage) {}
 ```
 * `objectName` : `@ModelAttribute` 의 이름
 * `defaultMessage` : 오류 기본 메시지
+
+
+## errors 메시지 파일 생성
+* `application.properties`
+  * `spring.messages.basename=messages,errors`
+  * 생략하면 `messages.properties` 를 기본으로 인식
+
+
+## DefaultMessageCodesResolver의 기본 메시지 생성 규칙
+* 객체 오류
+```txt
+객체 오류의 경우 다음 순서로 2가지 생성
+1.: code + "." + object name
+2.: code
+
+예) 오류 코드: required, object name: item
+1.: required.item
+2.: required
+```
+
+* 필드 오류
+```txt
+필드 오류의 경우 다음 순서로 4가지 메시지 코드 생성
+1.: code + "." + object name + "." + field
+2.: code + "." + field
+3.: code + "." + field type
+4.: code
+
+예) 오류 코드: typeMismatch, object name "user", field "age", field type: int
+1. "typeMismatch.user.age"
+2. "typeMismatch.age"
+3. "typeMismatch.int"
+4. "typeMismatch"
+```
+
+## Validator
+```java
+public interface Validator {
+  boolean supports(Class<?> clazz);
+  void validate(Object target, Errors errors);
+}
+```
+* `supports() {}` : 해당 검증기를 지원하는 클래스인지 확인
+* `validate(Object target, Errors errors)` : 검증 대상 객체와 `BindingResult`
+
+
+## WebDataBinder
+```java
+@InitBinder
+public void init(WebDataBinder dataBinder) {
+  log.info("init binder {}", dataBinder);
+  dataBinder.addValidators(itemValidator);
+}
+```
+* `WebDataBinder` 에 검증기를 추가하면 **해당** 컨트롤러에서는 검증기를 자동으로 적용
+* @Validated 적용
+  * `WebDataBinder` 에 등록한 검증기를 찾아서 실행
+  * 여러 검증기를 등록한다면 그 중에 어떤 검증기가 실행되어야 할지 구분이 필요
+    * 이때 `supports()` 사용
+    * `supports(Item.class)` 호출되고, 결과가 `true` 이므로 `ItemValidator` 의 `validate()` 가 호출
 
 
 ## 멀티 모듈 생성
