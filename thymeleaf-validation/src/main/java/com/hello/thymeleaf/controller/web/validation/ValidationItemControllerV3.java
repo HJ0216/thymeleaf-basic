@@ -7,14 +7,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
-import org.springframework.validation.ObjectError;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,12 +23,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class ValidationItemControllerV3 {
 
   private final ItemRepository itemRepository;
-  private final ItemValidator validator;
-
-  @InitBinder
-  public void init(WebDataBinder dataBinder) {
-    dataBinder.addValidators(validator);
-  }
 
   @GetMapping
   public String items(Model model) {
@@ -55,184 +44,26 @@ public class ValidationItemControllerV3 {
     return "validation/v3/addForm";
   }
 
-//  @PostMapping("/add")
-  public String addItemV1(
-      @ModelAttribute Item item, // @ModelAttribute Item item으로 받은 객체는 자동으로 "item"이라는 이름으로 Model에 추가
-      BindingResult bindingResult,
-      RedirectAttributes redirectAttributes
-  ) {
-    if (!StringUtils.hasText(item.getItemName())) {
-      bindingResult.addError(new FieldError("item", "itemName", "상품 이름 입력은 필수입니다."));
-    }
-    if (item.getPrice() == null || item.getPrice() < 1_000 || item.getPrice() > 1_000_000) {
-      bindingResult.addError(new FieldError("item", "price", "가격은 1,000 ~ 1,000,000원까지 허용합니다."));
-    }
-    if (item.getQuantity() == null || item.getQuantity() >= 9_999) {
-      bindingResult.addError(new FieldError("item", "quantity", "수량은 최대 9,999개까지 허용합니다."));
-    }
-
-    if (item.getPrice() != null && item.getQuantity() != null) {
-      int resultPrice = item.getPrice() * item.getQuantity();
-      if (resultPrice < 10_000) {
-        // object의 필드가 아닐 경우,
-        bindingResult.addError(
-            new ObjectError("item", "가격*수량의 합은 10,000원 이상이어야 합니다. 현재값: " + resultPrice));
-      }
-    }
-
-    if (bindingResult.hasErrors()) {
-      log.info("errors: {}", bindingResult);
-      return "validation/v3/addForm";
-    }
-
-    Item savedItem = itemRepository.save(item);
-    redirectAttributes.addAttribute("itemId", savedItem.getId());
-    redirectAttributes.addAttribute("status", true);
-    return "redirect:/validation/v3/items/{itemId}";
-  }
-
-//  @PostMapping("/add")
-  public String addItemV2(
-      @ModelAttribute Item item, // @ModelAttribute Item item으로 받은 객체는 자동으로 "item"이라는 이름으로 Model에 추가
-      BindingResult bindingResult,
-      RedirectAttributes redirectAttributes
-  ) {
-    if (!StringUtils.hasText(item.getItemName())) {
-      bindingResult.addError(new FieldError("item", "itemName", item.getItemName(), false, null, null, "상품 이름 입력은 필수입니다."));
-    }
-    if (item.getPrice() == null || item.getPrice() < 1_000 || item.getPrice() > 1_000_000) {
-      bindingResult.addError(new FieldError("item", "price", item.getPrice(), false, null, null, "가격은 1,000 ~ 1,000,000원까지 허용합니다."));
-    }
-    if (item.getQuantity() == null || item.getQuantity() >= 9_999) {
-      bindingResult.addError(new FieldError("item", "quantity", item.getQuantity(), false, null, null, "수량은 최대 9,999개까지 허용합니다."));
-    }
-
-    if (item.getPrice() != null && item.getQuantity() != null) {
-      int resultPrice = item.getPrice() * item.getQuantity();
-      if (resultPrice < 10_000) {
-        // object의 필드가 아닐 경우,
-        bindingResult.addError(
-            new ObjectError("item", null, null, "가격*수량의 합은 10,000원 이상이어야 합니다. 현재값: " + resultPrice));
-      }
-    }
-
-    if (bindingResult.hasErrors()) {
-      log.info("errors: {}", bindingResult);
-      return "validation/v3/addForm";
-    }
-
-    Item savedItem = itemRepository.save(item);
-    redirectAttributes.addAttribute("itemId", savedItem.getId());
-    redirectAttributes.addAttribute("status", true);
-    return "redirect:/validation/v3/items/{itemId}";
-  }
-
-//  @PostMapping("/add")
-  public String addItemV3(
-      @ModelAttribute Item item, // @ModelAttribute Item item으로 받은 객체는 자동으로 "item"이라는 이름으로 Model에 추가
-      BindingResult bindingResult,
-      RedirectAttributes redirectAttributes
-  ) {
-    if (!StringUtils.hasText(item.getItemName())) {
-      bindingResult.addError(new FieldError("item", "itemName", item.getItemName(), false, new String[]{"required.item.itemName"}, null, null));
-    }
-    if (item.getPrice() == null || item.getPrice() < 1_000 || item.getPrice() > 1_000_000) {
-      bindingResult.addError(new FieldError("item", "price", item.getPrice(), false, new String[]{"range.item.price"}, new Object[]{1_000, 1_000_000}, null));
-    }
-    if (item.getQuantity() == null || item.getQuantity() >= 9_999) {
-      bindingResult.addError(new FieldError("item", "quantity", item.getQuantity(), false, new String[]{"max.item.quantity"}, new Object[]{9_999}, null));
-    }
-
-    if (item.getPrice() != null && item.getQuantity() != null) {
-      int resultPrice = item.getPrice() * item.getQuantity();
-      if (resultPrice < 10_000) {
-        // object의 필드가 아닐 경우,
-        bindingResult.addError(
-            new ObjectError("item", new String[]{"totalPriceMin"}, new Object[]{10_000, resultPrice}, null));
-      }
-    }
-
-    if (bindingResult.hasErrors()) {
-      log.info("errors: {}", bindingResult);
-      return "validation/v3/addForm";
-    }
-
-    Item savedItem = itemRepository.save(item);
-    redirectAttributes.addAttribute("itemId", savedItem.getId());
-    redirectAttributes.addAttribute("status", true);
-    return "redirect:/validation/v3/items/{itemId}";
-  }
-
-//  @PostMapping("/add")
-  public String addItemV4(
-      @ModelAttribute Item item, // @ModelAttribute Item item으로 받은 객체는 자동으로 "item"이라는 이름으로 Model에 추가
-      BindingResult bindingResult,
-      Model model,
-      RedirectAttributes redirectAttributes
-  ) {
-
-    log.info("objectName={}", bindingResult.getObjectName());
-    log.info("target={}", bindingResult.getTarget());
-
-    if (!StringUtils.hasText(item.getItemName())) {
-      bindingResult.rejectValue("itemName", "required");
-    }
-    if (item.getPrice() == null || item.getPrice() < 1_000 || item.getPrice() > 1_000_000) {
-      bindingResult.rejectValue("price", "range", new Object[]{1_000, 1_000_000}, null);
-    }
-    if (item.getQuantity() == null || item.getQuantity() >= 9_999) {
-      bindingResult.rejectValue("quantity", "max", new Object[]{9_999}, null);
-    }
-
-    if (item.getPrice() != null && item.getQuantity() != null) {
-      int resultPrice = item.getPrice() * item.getQuantity();
-      if (resultPrice < 10_000) {
-        // object의 필드가 아닐 경우,
-        bindingResult.reject("totalPriceMin", new Object[]{10_000, resultPrice}, null);
-      }
-    }
-
-    if (bindingResult.hasErrors()) {
-      log.info("errors: {}", bindingResult);
-      return "validation/v3/addForm";
-    }
-
-    Item savedItem = itemRepository.save(item);
-    redirectAttributes.addAttribute("itemId", savedItem.getId());
-    redirectAttributes.addAttribute("status", true);
-    return "redirect:/validation/v3/items/{itemId}";
-  }
-
-//  @PostMapping("/add")
-  public String addItemV5(
-      @ModelAttribute Item item, // @ModelAttribute Item item으로 받은 객체는 자동으로 "item"이라는 이름으로 Model에 추가
-      BindingResult bindingResult,
-      Model model,
-      RedirectAttributes redirectAttributes
-  ) {
-
-    if (validator.supports(item.getClass())) {
-      validator.validate(item, bindingResult);
-    }
-
-    if (bindingResult.hasErrors()) {
-      log.info("errors: {}", bindingResult);
-      return "validation/v3/addForm";
-    }
-
-    Item savedItem = itemRepository.save(item);
-    redirectAttributes.addAttribute("itemId", savedItem.getId());
-    redirectAttributes.addAttribute("status", true);
-    return "redirect:/validation/v3/items/{itemId}";
-  }
-
   @PostMapping("/add")
-  public String addItemV6(
-      @Validated @ModelAttribute Item item, // @ModelAttribute Item item으로 받은 객체는 자동으로 "item"이라는 이름으로 Model에 추가
+  public String addItem(
+      @Validated @ModelAttribute Item item,
+      // @ModelAttribute Item item으로 받은 객체는 자동으로 "item"이라는 이름으로 Model에 추가
       BindingResult bindingResult,
       Model model,
       RedirectAttributes redirectAttributes
   ) {
+
+    //특정 필드 예외가 아닌 전체 예외
+    if (item.getPrice() != null && item.getQuantity() != null) {
+      int resultPrice = item.getPrice() * item.getQuantity();
+      if (resultPrice < 10000) {
+        bindingResult.reject(
+            "totalPriceMin",
+            new Object[]{10000, resultPrice},
+            null
+        );
+      }
+    }
 
     if (bindingResult.hasErrors()) {
       log.info("errors: {}", bindingResult);
@@ -253,7 +84,30 @@ public class ValidationItemControllerV3 {
   }
 
   @PostMapping("/{itemId}/edit")
-  public String editItem(@PathVariable("itemId") Long itemId, @ModelAttribute Item item) {
+  public String editItem(
+      @PathVariable("itemId") Long itemId,
+      @Validated @ModelAttribute Item item,
+      BindingResult result
+  ) {
+
+    //특정 필드 예외가 아닌 전체 예외
+    if (item.getPrice() != null && item.getQuantity() != null) {
+      int resultPrice = item.getPrice() * item.getQuantity();
+      if (resultPrice < 10000) {
+        result.reject(
+            "totalPriceMin",
+            new Object[]{10000, resultPrice},
+            null
+        );
+      }
+    }
+
+    if (result.hasErrors()) {
+      log.info("errors: {}", result);
+      return "validation/v3/editForm";
+    }
+
+
     itemRepository.update(itemId, item);
     return "redirect:/validation/v3/items/{itemId}";
   }
