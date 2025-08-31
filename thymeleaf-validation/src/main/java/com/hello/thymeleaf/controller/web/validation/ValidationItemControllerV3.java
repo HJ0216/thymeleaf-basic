@@ -1,6 +1,8 @@
 package com.hello.thymeleaf.controller.web.validation;
 
 import com.hello.thymeleaf.domain.Item;
+import com.hello.thymeleaf.domain.SaveCheck;
+import com.hello.thymeleaf.domain.UpdateCheck;
 import com.hello.thymeleaf.repository.ItemRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -44,12 +46,42 @@ public class ValidationItemControllerV3 {
     return "validation/v3/addForm";
   }
 
-  @PostMapping("/add")
+//  @PostMapping("/add")
   public String addItem(
       @Validated @ModelAttribute Item item,
       // @ModelAttribute Item item으로 받은 객체는 자동으로 "item"이라는 이름으로 Model에 추가
       BindingResult bindingResult,
-      Model model,
+      RedirectAttributes redirectAttributes
+  ) {
+
+    //특정 필드 예외가 아닌 전체 예외
+    if (item.getPrice() != null && item.getQuantity() != null) {
+      int resultPrice = item.getPrice() * item.getQuantity();
+      if (resultPrice < 10000) {
+        bindingResult.reject(
+            "totalPriceMin",
+            new Object[]{10000, resultPrice},
+            null
+        );
+      }
+    }
+
+    if (bindingResult.hasErrors()) {
+      log.info("errors: {}", bindingResult);
+      return "validation/v3/addForm";
+    }
+
+    Item savedItem = itemRepository.save(item);
+    redirectAttributes.addAttribute("itemId", savedItem.getId());
+    redirectAttributes.addAttribute("status", true);
+    return "redirect:/validation/v3/items/{itemId}";
+  }
+
+  @PostMapping("/add")
+  public String addItem2(
+      @Validated(SaveCheck.class) @ModelAttribute Item item,
+      // @ModelAttribute Item item으로 받은 객체는 자동으로 "item"이라는 이름으로 Model에 추가
+      BindingResult bindingResult,
       RedirectAttributes redirectAttributes
   ) {
 
@@ -83,7 +115,7 @@ public class ValidationItemControllerV3 {
     return "validation/v3/editForm";
   }
 
-  @PostMapping("/{itemId}/edit")
+//  @PostMapping("/{itemId}/edit")
   public String editItem(
       @PathVariable("itemId") Long itemId,
       @Validated @ModelAttribute Item item,
@@ -111,4 +143,34 @@ public class ValidationItemControllerV3 {
     itemRepository.update(itemId, item);
     return "redirect:/validation/v3/items/{itemId}";
   }
+
+  @PostMapping("/{itemId}/edit")
+  public String editItem2(
+      @PathVariable("itemId") Long itemId,
+      @Validated(UpdateCheck.class) @ModelAttribute Item item,
+      BindingResult result
+  ) {
+
+    //특정 필드 예외가 아닌 전체 예외
+    if (item.getPrice() != null && item.getQuantity() != null) {
+      int resultPrice = item.getPrice() * item.getQuantity();
+      if (resultPrice < 10000) {
+        result.reject(
+            "totalPriceMin",
+            new Object[]{10000, resultPrice},
+            null
+        );
+      }
+    }
+
+    if (result.hasErrors()) {
+      log.info("errors: {}", result);
+      return "validation/v3/editForm";
+    }
+
+
+    itemRepository.update(itemId, item);
+    return "redirect:/validation/v3/items/{itemId}";
+  }
+
 }
