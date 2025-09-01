@@ -469,6 +469,95 @@ public void init(WebDataBinder dataBinder) {
   * 컨트롤러도 호출되지 않고, Validator도 적용할 수 없음
 
 
+## 서블릿 예외 처리
+* 종류
+  * Exception (예외)
+    * WAS(여기까지 전파) <- 필터 <- 서블릿 <- 인터셉터 <- 컨트롤러(예외발생)
+  * response.sendError(HTTP 상태 코드, 오류 메시지)
+    * 호출한다고 당장 예외가 발생하는 것은 아니지만, 서블릿 컨테이너에게 오류가 발생했다는 점을 전달할 수 있음
+
+### 서블릿 오류 페이지 등록
+* `WebServerFactoryCustomizer<ConfigurableWebServerFactory>` 구현
+  * 오류 페이지는 예외를 다룰 때 해당 예외와 그 자식 타입의 오류를 함께 처리
+
+### 예외 발생과 오류 페이지 요청 흐름
+1. WAS(여기까지 전파) <- 필터 <- 서블릿 <- 인터셉터 <- 컨트롤러(예외발생)
+2. WAS `/error-page/500` 다시 요청 -> 필터 -> 서블릿 -> 인터셉터 -> 컨트롤러(/error-page/500) -> View
+
+### 오류 정보 추가
+WAS는 오류 페이지를 단순히 다시 요청만 하는 것이 아니라, 오류 정보를 request 의 attribute 에 추가해서 넘김  
+필요하면 오류 페이지에서 이렇게 전달된 오류 정보를 사용할 수 있음
+```java
+private void printErrorInfo(HttpServletRequest request) {
+  log.info("ERROR_EXCEPTION: {}", request.getAttribute(ERROR_EXCEPTION));
+  log.info("ERROR_EXCEPTION_TYPE: {}",
+      request.getAttribute(ERROR_EXCEPTION_TYPE));
+  log.info("ERROR_MESSAGE: {}",
+      request.getAttribute(ERROR_MESSAGE)); //ex의 경우 NestedServletException 스프링이 한번 감싸서 반환
+  log.info("ERROR_REQUEST_URI: {}",
+      request.getAttribute(ERROR_REQUEST_URI));
+  log.info("ERROR_SERVLET_NAME: {}",
+      request.getAttribute(ERROR_SERVLET_NAME));
+  log.info("ERROR_STATUS_CODE: {}",
+      request.getAttribute(ERROR_STATUS_CODE));
+  log.info("dispatchType={}", request.getDispatcherType());
+}
+```
+
+### DispatcherType
+* REQUEST : 클라이언트 요청
+* ERROR : 오류 요청
+
+```java
+// 필터를 등록할 때 어떤 DispatcherType 인 경우에 필터를 적용할 지 선택
+@Bean
+public FilterRegistrationBean logFilter(){
+  FilterRegistrationBean<Filter> filterRegistrationBean = new FilterRegistrationBean<>();
+  filterRegistrationBean.setFilter(new LogFilter());
+  filterRegistrationBean.setOrder(1);
+  filterRegistrationBean.addUrlPatterns("/*");
+  filterRegistrationBean.setDispatcherTypes(DispatcherType.REQUEST, DispatcherType.ERROR);
+  // 클라이언트 요청은 물론이고, 오류 페이지 요청에서도 필터가 호출
+  // 아무것도 넣지 않으면 기본 값(DispatcherType.REQUEST) 사용
+
+  return filterRegistrationBean;
+}
+
+// 인터셉터는 DispatcherType과 무관하게 항상 호출
+// 오류 페이지 경로를 excludePathPatterns 를 사용해서 제외 가능
+@Override
+public void addInterceptors(InterceptorRegistry registry) {
+  registry.addInterceptor(new LogInterceptor())
+          .order(1)
+          .addPathPatterns("/**")
+          .excludePathPatterns("/css/**", "*.ico", "/error", "/error-page/**");
+}
+```
+
+
+## 뷰 선택 우선순위
+BasicErrorController 의 처리 순서  
+1. 뷰 템플릿
+  * resources/templates/error/500.html
+  * resources/templates/error/5xx.html
+2. 정적 리소스( static , public )
+  * resources/static/error/400.html
+  * resources/static/error/404.html
+  * resources/static/error/4xx.html
+3. 적용 대상이 없을 때 뷰 이름( error )
+  * resources/templates/error.html
+
+
+### BasicErrorController
+* 오류 컨트롤러에서 다음 오류 정보를 model 에 포함할지 여부 선택할 수 있음
+```txt
+server.error.include-exception=false : exception 포함 여부(true, false)
+server.error.include-message=never : message 포함 여부(never, always, on_param)
+server.error.include-stacktrace=never : trace 포함 여부
+server.error.include-binding-errors=never : errors 포함 여부
+```
+
+
 ## 멀티 모듈 생성
 1. Root Project 생성
 
