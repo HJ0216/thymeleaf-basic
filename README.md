@@ -425,6 +425,50 @@ public void init(WebDataBinder dataBinder) {
     * `supports(Item.class)` 호출되고, 결과가 `true` 이므로 `ItemValidator` 의 `validate()` 가 호출
 
 
+## Bean Validation
+* 검증 순서
+  1. `@ModelAttribute` 각각의 필드에 타입 변환 시도 → 실패하면 `typeMismatch` 로 `FieldError` 추가
+  2. Validator 적용
+* BeanValidation 메시지 찾는 순서
+  1. 생성된 메시지 코드 순서대로 `messageSource` 에서 메시지 찾기
+  2. 애노테이션의 `message` 속성 사용 `@NotBlank(message = "공백! {0}")`
+  3. 라이브러리가 제공하는 기본 값 사용 공백일 수 없습니다.
+* 오브젝트 오류(글로벌 오류)의
+  * DTO에서 `@ScriptAssert`을 억지로 사용하는 것 보다는 Controller 메서드에서 오브젝트 오류 관련 부분만 직접 자바 코드로 작성하는 것을 권장
+
+### groups
+* 등록시에 검증할 기능과 수정시에 검증할 기능을 각각 그룹으로 나누어 적용
+  * groups를 사용하려면 `@Validated` 를 사용
+  * groups 기능을 사용할 경우, 복잡도가 올라가 실무에서는 주로 다음에 등장하는 등록용 폼 객체와 수정용 폼 객체를 분리해서 사용
+
+
+## Form 전송 객체 분리
+* 실무에서는 회원 등록시 회원과 관련된 데이터만 전달받는 것이 아니라, 약관 정보도 추가로 받는 등 `Item` 과 관계없는 수 많은 부가 데이터가 넘어옴
+* 그래서 보통 `Item` 을 직접 전달받는 것이 아니라, 복잡한 폼의 데이터를 컨트롤러까지 전달할 별도의 객체를 만들어서 전달
+
+
+## HttpMessageConverter(@RequestBody)
+* `@ModelAttribute` 는 HTTP 요청 파라미터(URL 쿼리 스트링, POST Form)를 다룰 때 사용
+* `@RequestBody` 는 HTTP Body의 데이터를 객체로 변환할 때 사용(주로 API JSON 요청을 다룰 때 사용)
+
+* API: 3가지 경우
+  * 성공 요청: 성공
+  * 실패 요청: JSON을 객체로 생성하는 것 자체가 실패함
+    * 객체를 만들지 못하기 때문에 컨트롤러 자체가 호출되지 않고 그 전에 예외가 발생
+    * Validator도 실행되지 않음
+  * 검증 오류 요청: JSON을 객체로 생성하는 것은 성공했고, 검증에서 실패함
+
+### @ModelAttribute vs @RequestBody
+* HTTP 요청 파리미터를 처리하는 `@ModelAttribute` 는 각각의 필드 단위로 세밀하게 적용
+  * 특정 필드에 타입이 맞지 않는 오류가 발생해도 나머지 필드는 정상 처리할 수 있음
+* `HttpMessageConverter`는 `@ModelAttribute` 와 다르게 각각의 필드 단위로 적용되는 것이 아니라, 전체 객체 단위로 적용
+  * 따라서 메시지 컨버터의 작동이 성공해서 `ItemSaveForm` 객체를 만들어야 `@Valid` , `@Validated` 가 적용
+* `@ModelAttribute`는 필드 단위로 정교하게 바인딩이 적용
+  * 특정 필드가 바인딩 되지 않아도 나머지 필드는 정상 바인딩 되고, Validator를 사용한 검증도 적용할 수 있음
+* `@RequestBody`는 HttpMessageConverter 단계에서 JSON 데이터를 객체로 변경하지 못하면 이후 단계 자체가 진행되지 않고 예외가 발생
+  * 컨트롤러도 호출되지 않고, Validator도 적용할 수 없음
+
+
 ## 멀티 모듈 생성
 1. Root Project 생성
 
