@@ -558,6 +558,25 @@ server.error.include-binding-errors=never : errors 포함 여부
 ```
 
 
+## API 예외 처리
+오류 페이지는 단순히 고객에게 오류 화면을 보여주고 끝이지만, API는 각 오류 상황에 맞는 오류 응답 스펙을 정하고, JSON으로 데이터를 전달해야 함
+* `produces = MediaType.APPLICATION_JSON_VALUE`
+  * 클라이언트가 요청하는 HTTP Header의 Accept 의 값이 application/json 일 때 해당 메서드가 호출
+    (클라어인트가 받고 싶은 미디어 타입이 json이면 이 컨트롤러의 메서드가 호출)
+
+### BasicErrorController
+* errorHtml() : produces = MediaType.TEXT_HTML_VALUE : 클라이언트 요청의 Accept 해더 값이text/html 인 경우에는 errorHtml() 을 호출해서 view를 제공
+* error() : 그외 경우에 호출되고 ResponseEntity 로 HTTP Body에 JSON 데이터를 반환
+* 오류 발생시 /error 를 오류 페이지로 요청(스프링 부트의 기본 설정)
+* 오류 정보 관련 옵션
+  * server.error.include-binding-errors=always
+  * server.error.include-exception=true
+  * server.error.include-message=always
+  * server.error.include-stacktrace=always
+* BasicErrorController는 HTML 화면을 처리할 때 사용하고, API 오류 처리는 뒤에서 설명할 @ExceptionHandler 를 사용
+  * 매우 세밀하고 복잡: 예를 들어서 회원과 관련된 API에서 예외가 발생할 때 응답과, 상품과 관련된 API에서 발생하는 예외에 따라 그 결과가 달라질 수 있음
+
+
 ## 멀티 모듈 생성
 1. Root Project 생성
 
