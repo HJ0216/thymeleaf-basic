@@ -599,6 +599,19 @@ server.error.include-binding-errors=never : errors 포함 여부
 * 예외가 발생하면 WAS까지 예외가 던져지고, WAS에서 오류 페이지 정보를 찾아서 다시 /error 를 호출하는 과정을 ExceptionResolver에서 처리
 
 
+## 스프링이 제공하는 ExceptionResolver
+1. ExceptionHandlerExceptionResolver
+2. ResponseStatusExceptionResolver
+  * 예외에 따라서 HTTP 상태 코드를 지정
+  * @ResponseStatus가 달려있는 예외
+    * reason을 MessageSource 에서 찾는 기능도 제공
+  * ResponseStatusException 예외
+    * 개발자가 직접 변경할 수 없는 예외에 적용
+    * 조건에 따라 동적으로 변경하는 경우에 적용
+3. DefaultHandlerExceptionResolver
+  * 스프링 내부에서 발생하는 스프링 예외를 해결
+
+
 ## 멀티 모듈 생성
 1. Root Project 생성
 
